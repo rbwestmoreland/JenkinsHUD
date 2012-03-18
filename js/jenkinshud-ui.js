@@ -44,7 +44,7 @@ var jenkinsHUDUIModule = (function () {
 
     function onLoad() {
         $('#header-title').html('JenkinsHUD');
-
+        $("#jenkins-welcome").hide();
         $("#jenkins-invalid-url").show();
         $("#jenkins-container").hide();
     }
