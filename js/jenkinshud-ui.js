@@ -11,7 +11,27 @@ $(document).ready(function () {
         $("#modal-setup-url").val(jenkinsHUDModule.url());
     });
 
-    $("#modal-setup-save").click(function () {
+    $("#modal-body-url").click(function () {
+        //Init JenkinsHUD
+        jenkinsHudInit();
+    });
+
+    $("#modal-setup").submit(function () {
+        //Init JenkinsHUD
+        jenkinsHudInit();
+        $("#modal-setup").modal('hide');
+        return false;
+    });
+
+    if (jenkinsHUDModule.isInit()) {
+        //Load JenkinsHUD
+        jenkinsHUDLoad();
+    }
+    else {
+        $("#jenkins-welcome").show();
+    }
+
+    function jenkinsHudInit() {
         var url = $("#modal-setup-url").val();
         if (url != null && url != "") {
             //Initialize JenkinsHUD
@@ -19,17 +39,9 @@ $(document).ready(function () {
             //Load JenkinsHUD
             loadJenkinsHUD();
         }
-    });
-
-    if (jenkinsHUDModule.isInit()) {
-        //Load JenkinsHUD
-        loadJenkinsHUD();
-    }
-    else {
-        $("#jenkins-welcome").show();
     }
 
-    function loadJenkinsHUD() {
+    function jenkinsHUDLoad() {
         //Load JenkinsHUD
         jenkinsHUDModule.load();
         //Reload JenkinsHUD every 5 seconds
