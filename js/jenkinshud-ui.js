@@ -11,7 +11,7 @@ $(document).ready(function () {
         $("#modal-setup-url").val(jenkinsHUDModule.url());
     });
 
-    $("#modal-body-url").click(function () {
+    $("#modal-setup-save").click(function () {
         //Init JenkinsHUD
         jenkinsHudInit();
     });
@@ -37,7 +37,7 @@ $(document).ready(function () {
             //Initialize JenkinsHUD
             jenkinsHUDModule.init(url);
             //Load JenkinsHUD
-            loadJenkinsHUD();
+            jenkinsHUDLoad();
         }
     }
 
