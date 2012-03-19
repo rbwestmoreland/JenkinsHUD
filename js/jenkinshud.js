@@ -50,64 +50,200 @@ var jenkinsHUDModule = (function () {
     }
 
     function load() {
-        //jenkinsHUDUIModule.onLoad(); //todo: implement pubsub
-
-        jenkinsHUDUIModule.onLoadQueue(); //todo: implement pubsub
-        jsonpModule.load(urlModule.queueUrl(), 'jenkinsHUDModule.callbackQueue');
-
-        jenkinsHUDUIModule.onLoadComputers(); //todo: implement pubsub
-        jsonpModule.load(urlModule.computersUrl(), 'jenkinsHUDModule.callbackComputers');
-
-        jenkinsHUDUIModule.onLoadJobs(); //todo: implement pubsub
-        jsonpModule.load(urlModule.jobsUrl(), 'jenkinsHUDModule.callbackJobs');
+        jsonpModule.load(urlModule.queueUrl(), 'jenkinsHUDModule.queueSuccessCallback', jenkinsHUDModule.queueErrorCallback);
+        jsonpModule.load(urlModule.computersUrl(), 'jenkinsHUDModule.computersSuccessCallback', jenkinsHUDModule.computersErrorCallback);
+        jsonpModule.load(urlModule.jobsUrl(), 'jenkinsHUDModule.jobsSuccessCallback', jenkinsHUDModule.jobsErrorCallback);
     }
 
-    var lastUpdated;
+    var JobsModule = (function () {
 
-    function callbackBase() {
-        //jenkinsHUDUIModule.onCallback(); //todo: implement pubsub
-        lastUpdated = dateModule.get();
-    }
+        var currentData;
+        var lastData;
 
-    var queue;
-    var lastQueue;
+        function successCallback(data) {
+            lastData = currentData;
+            currentData = data;
 
-    function callbackQueue(data) {
-        callbackBase();
-        lastQueue = queue;
-        queue = data;
-        jenkinsHUDUIModule.onCallbackQueue(queue, lastQueue); //todo: implement pubsub
-    }
+            $('#header-title').html(jenkinsHUDModule.url());
+            $("#jenkins-lastupdated").html(dateModule.get());
+            $("#jenkins-invalid-url").hide();
+            $("#jenkins-container").show();
+            $("#jenkins-jobs").empty();
 
-    var computers;
-    var lastComputers;
+            $.each(data.jobs, function () {
+                var color = this.color;
+                var name = this.name;
+                var url = this.url;
+                var labelType;
 
-    function callbackComputers(data) {
-        callbackBase();
-        lastComputers = computers;
-        computers = data;
-        jenkinsHUDUIModule.onCallbackComputers(computers, lastComputers); //todo: implement pubsub
-    }
+                switch (color) {
 
-    var jobs;
-    var lastJobs;
+                    case "red":
+                    case "red_anime":
+                        labelType = 'label-important';
+                        break;
+                    case "yellow":
+                    case "yellow_anime":
+                        labelType = 'label-warning';
+                        break;
+                    case "blue":
+                    case "blue_anime":
+                        labelType = 'label-success';
+                        break;
+                    case "disabled":
+                    default:
+                        labelType = '';
+                        break;
+                }
 
-    function callbackJobs(data) {
-        callbackBase();
-        lastJobs = jobs;
-        jobs = data;
-        jenkinsHUDUIModule.onCallbackJobs(jobs, lastJobs); //todo: implement pubsub
-    }
+                $("#jenkins-jobs").append('<span class="job label ' + labelType + '">' + name + '</span>');
+            });
+        }
+
+        function errorCallback() {
+            $('#header-title').html('JenkinsHUD');
+            $("#jenkins-lastupdated").html(dateModule.get());
+            $("#jenkins-welcome").hide();
+            $("#jenkins-invalid-url").show();
+            $("#jenkins-container").hide();
+            $("#jenkins-jobs").hide();
+            $("#jenkins-jobs").empty();
+        }
+
+        return {
+            successCallback: successCallback,
+            errorCallback: errorCallback
+        }
+
+    } ());
+
+    var QueueModule = (function () {
+
+        var currentData;
+        var lastData;
+
+        function successCallback(data) {
+            lastData = currentData;
+            currentData = data;
+
+            $('#header-title').html(jenkinsHUDModule.url());
+            $("#jenkins-lastupdated").html(dateModule.get());
+            $("#jenkins-invalid-url").hide();
+            $("#jenkins-container").show();
+            $('#jenkins-queue').empty();
+
+            $.each(data.items, function () {
+                var name = this.task.name;
+
+                if (name.length > 25) {
+                    name = name.substring(0, 22) + '...';
+                }
+
+                $('#jenkins-queue').append('<p><span class="job label label-inverse">' + name + '</span></p>');
+            });
+        }
+
+        function errorCallback() {
+            $('#header-title').html('JenkinsHUD');
+            $("#jenkins-lastupdated").html(dateModule.get());
+            $("#jenkins-welcome").hide();
+            $("#jenkins-invalid-url").show();
+            $("#jenkins-container").hide();
+        }
+
+        return {
+            successCallback: successCallback,
+            errorCallback: errorCallback
+        }
+
+    } ());
+
+    var ComputersModule = (function () {
+
+        var currentData;
+        var lastData;
+
+        function successCallback(data) {
+            lastData = currentData;
+            currentData = data;
+
+            $('#header-title').html(jenkinsHUDModule.url());
+            $("#jenkins-lastupdated").html(dateModule.get());
+            $("#jenkins-invalid-url").hide();
+            $("#jenkins-container").show();
+            $('#jenkins-computers').empty();
+
+            $.each(data.computer, function () {
+                $('#jenkins-computers').append('<h4>' + this.displayName + '</h4>');
+                $.each(this.oneOffExecutors, function () {
+                    if (!this.idle) {
+                        var progress = this.progress;
+                        var buildnumber = this.currentExecutable.number.toString();
+                        var name = this.currentExecutable.fullDisplayName;
+                        name = name.substring(0, name.length - buildnumber.length - 2);
+
+                        if (name.length > 25) {
+                            name = name.substring(0, 22) + '...';
+                        }
+
+                        $('#jenkins-computers').append('<br/>');
+                        $('#jenkins-computers').append('<span class="job label label-inverse">' + name + '</span>');
+                        $('#jenkins-computers').append('<div class="progress progress-striped active"><div class="bar"style="width: ' + progress + '%;"></div></div>');
+                    }
+                });
+
+                $.each(this.executors, function () {
+                    var number = this.number + 1;
+
+                    $('#jenkins-computers').append('<br/>');
+                    if (!this.idle) {
+                        var progress = this.progress;
+                        var buildnumber = this.currentExecutable.number.toString();
+                        var name = this.currentExecutable.fullDisplayName;
+                        name = name.substring(0, name.length - buildnumber.length - 2);
+
+                        if (name.length > 25) {
+                            name = name.substring(0, 22) + '...';
+                        }
+
+                        $('#jenkins-computers').append('<span class="job label label-inverse">' + name + '</span>');
+                        $('#jenkins-computers').append('<div class="progress progress-striped active"><div class="bar"style="width: ' + progress + '%;"></div></div>');
+                    }
+                    else {
+                        $('#jenkins-computers').append('<span>idle</span>');
+                    }
+                });
+                $('#jenkins-computers').append('<hr/>');
+            });
+        }
+
+        function errorCallback() {
+            $('#header-title').html('JenkinsHUD');
+            $("#jenkins-lastupdated").html(dateModule.get());
+            $("#jenkins-welcome").hide();
+            $("#jenkins-invalid-url").show();
+            $("#jenkins-container").hide();
+        }
+
+        return {
+            successCallback: successCallback,
+            errorCallback: errorCallback
+        }
+
+    } ());
 
     return {
-        isInit: urlModule.hasValue,
         init: init,
+        isInit: urlModule.hasValue,
         url: urlModule.get,
         load: load,
-        callbackQueue: callbackQueue,
-        callbackComputers: callbackComputers,
-        callbackJobs: callbackJobs
-    };
+        jobsSuccessCallback: JobsModule.successCallback,
+        jobsErrorCallback: JobsModule.errorCallback,
+        computersSuccessCallback: ComputersModule.successCallback,
+        computersErrorCallback: ComputersModule.errorCallback,
+        queueSuccessCallback: QueueModule.successCallback,
+        queueErrorCallback: QueueModule.errorCallback
+    }
 
 } ());
 //#endregion jenkinsModule

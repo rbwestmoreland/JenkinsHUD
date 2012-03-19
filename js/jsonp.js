@@ -2,16 +2,24 @@
 
 var jsonpModule = (function () {
 
-    function load(url, callback) {
-        $.ajax({
+    function load(url, jsonpCallback, errorCallback) {
+        var request = $.ajax({
             url: url,
             dataType: 'jsonp',
             jsonp: 'jsonp',
-            jsonpCallback: callback
+            jsonpCallback: jsonpCallback
+        });
+
+        request.complete(function (jqXHR, textStatus) {
+            if (errorCallback != null) {
+                if (jqXHR.status != 200) {
+                    errorCallback();
+                }
+            }
         });
     }
 
     return {
         load: load
     };
-}());
+} ());
