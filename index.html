@@ -27,13 +27,10 @@
             <div class="container">
                 <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"><span
                     class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
-                </a><a id="header-title" class="brand" data-toggle="modal" href="#modal-setup">JenkinsHUD</a>
+                </a><a class="brand" data-toggle="modal" href="#modal-setup"><span id="header-title">JenkinsHUD</span></a>
                 <div class="nav-collapse">
-                    <ul class="nav">
-                      <li><a href="#modal-setup" data-toggle="modal">Change</a></li>
-                    </ul>
                     <ul class="nav pull-right">
-                      <li><a href="#">Last Updated: <span id="jenkins-lastupdated">never</span></a></li>
+                      <li><a href="#">Last updated on <span id="jenkins-lastupdated">never</span> again in <span id="jenkins-refresh-countdown"></span> seconds</a></li>
                     </ul>
                  </div>
             </div>
@@ -55,8 +52,8 @@
             </div>
         </div>
         <div id="jenkins-invalid-url" style="display: none;">
-            <div class="alert alert-error">
-                <strong>Error!</strong> That url doesn't seem to work.
+            <div class="alert alert-warning">
+                <strong>Warning!</strong> That url doesn't seem to work, but we'll keep trying...
             </div>
         </div>
         <div class="modal" id="modal-setup" style="display: none;">
@@ -73,7 +70,6 @@
                 <a id="modal-setup-save" class="btn btn-primary" data-dismiss="modal">Save</a>
             </div>
         </div>
-        
         <div class="row" id="jenkins-container" style="display: none;">
             <div class="span3">
                 <div class="row">
@@ -99,7 +95,29 @@
                 </div>
             </div>
         </div>
-
+        <hr />
+        <footer>
+            <div class="row">
+                <div class="span12">
+                    <ul class="quick-links">
+                        <li><a href="https://github.com/betobates/JenkinsHUD">About</a></li>
+                        <li><a href="https://github.com/betobates/JenkinsHUD">Documentation</a></li>
+                        <li><a href="https://github.com/betobates/JenkinsHUD/issues">Submit issues</a></li>
+                        <li><a href="https://github.com/betobates/JenkinsHUD">License</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span12">
+                    <ul class="quick-links">
+                        <li><a href="https://twitter.com/intent/tweet?button_hashtag=jenkinshud" class="twitter-hashtag-button">Tweet #jenkinshud</a></li>
+                        <li><iframe src="http://markdotto.github.com/github-buttons/github-btn.html?user=betobates&repo=jenkinshud&type=follow&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="135px" height="20px"></iframe></li>
+                        <li><iframe src="http://markdotto.github.com/github-buttons/github-btn.html?user=betobates&repo=jenkinshud&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="90px" height="20px"></iframe></li>
+                        <li><iframe src="http://markdotto.github.com/github-buttons/github-btn.html?user=betobates&repo=jenkinshud&type=fork&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="90px" height="20px"></iframe></li>
+                    </ul>
+                </div>
+            </div>
+        </footer>
     </div>
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="js/jquery-1.7.1.min.js"></script>
@@ -109,5 +127,6 @@
     <script src="js/jsonp.js"></script>
     <script src="js/jenkinshud.js"></script>
     <script src="js/jenkinshud-ui.js"></script>
+    <script src="http://platform.twitter.com/widgets.js"></script>
 </body>
 </html>
