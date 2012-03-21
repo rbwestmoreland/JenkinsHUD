@@ -1,8 +1,26 @@
-﻿.job 
-{
+﻿.job {
     display: inline-block;
     font-size: 1em;
     margin: 0 9px 18px;
     padding: 12px;
     text-align: center;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.quick-links {
+    list-style: none outside none;
+    margin: 0;
+    min-height: 30px;
+    overflow: hidden;
+    padding: 5px 20px;
+    text-align: center;
+}
+
+.quick-links li {
+    color: #999999;
+    display: inline;
+    margin: 0 5px;
 }
