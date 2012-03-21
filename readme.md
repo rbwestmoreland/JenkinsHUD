@@ -1,5 +1,5 @@
-﻿#About
-
+﻿About
+=====
 JenkinsHUD provides a team oriented UI of the Jenkins dashboard. Best on big screens for all to see.
 
 ##How to Use

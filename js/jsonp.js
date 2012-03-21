@@ -2,21 +2,31 @@
 
 var jsonpModule = (function () {
 
-    function load(url, jsonpCallback, errorCallback) {
-        var request = $.ajax({
+    function load(url, successCallback, errorCallback) {
+
+        $.ajax({
+            accepts: 'application/json',
             url: url,
             dataType: 'jsonp',
             jsonp: 'jsonp',
-            jsonpCallback: jsonpCallback
+            timeout: 4000
+        }).success(function (data, textStatus, jqXHR) {
+            successCallback(data);
+        }).error(function (jqXHR, textStatus, errorThrown) {
+            errorCallback();
+        }).complete(function (jqXHR, textStatus) {
+            var request = jqXHR;
         });
 
-        request.complete(function (jqXHR, textStatus) {
-            if (errorCallback != null) {
-                if (jqXHR.status != 200) {
-                    errorCallback();
-                }
-            }
-        });
+        var $script = $(document.getElementsByTagName('head')[0].firstChild);
+        var url = $script.attr('src') || '';
+        var cb = (url.match(/jsonp=(\w+)/) || [])[1];
+
+        $script[0].onerror = function (e) {
+            errorCallback();
+        };
+
+        var wait = 'wait';
     }
 
     return {

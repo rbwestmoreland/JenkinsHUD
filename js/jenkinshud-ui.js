@@ -2,6 +2,7 @@
 /// <reference path="jenkinshud.js" />
 
 var jenkinsHUDReloadInterval;
+var jenkinsHUDReloadCountdownInterval;
 
 $(document).ready(function () {
 
@@ -42,12 +43,26 @@ $(document).ready(function () {
     }
 
     function jenkinsHUDLoad() {
+        var refreshInterval = 5000;
+        //Reset
+        clearInterval(jenkinsHUDReloadInterval);
+        clearInterval(jenkinsHUDReloadCountdownInterval);
         //Load JenkinsHUD
         jenkinsHUDModule.load();
         //Reload JenkinsHUD again, every 5 seconds
-        clearInterval(jenkinsHUDReloadInterval);
         jenkinsHUDReloadInterval = setInterval(function () {
             jenkinsHUDModule.load();
-        }, 5000);
+        }, refreshInterval);
+        //Update countdown, every second
+        $('#jenkins-refresh-countdown').html((refreshInterval / 1000));
+        jenkinsHUDReloadCountdownInterval = setInterval(function () {
+            var val = $('#jenkins-refresh-countdown').html();
+            if (val == 1) {
+                $('#jenkins-refresh-countdown').html((refreshInterval / 1000));
+            }
+            else {
+                $('#jenkins-refresh-countdown').html(val - 1);
+            }
+        }, 1000);
     }
 });

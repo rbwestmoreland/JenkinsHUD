@@ -50,9 +50,13 @@ var jenkinsHUDModule = (function () {
     }
 
     function load() {
-        jsonpModule.load(urlModule.queueUrl(), 'jenkinsHUDModule.queueSuccessCallback', jenkinsHUDModule.queueErrorCallback);
-        jsonpModule.load(urlModule.computersUrl(), 'jenkinsHUDModule.computersSuccessCallback', jenkinsHUDModule.computersErrorCallback);
-        jsonpModule.load(urlModule.jobsUrl(), 'jenkinsHUDModule.jobsSuccessCallback', jenkinsHUDModule.jobsErrorCallback);
+        jsonpModule.load(urlModule.queueUrl(), jenkinsHUDModule.queueSuccessCallback, jenkinsHUDModule.queueErrorCallback);
+        jsonpModule.load(urlModule.computersUrl(), jenkinsHUDModule.computersSuccessCallback, jenkinsHUDModule.computersErrorCallback);
+        jsonpModule.load(urlModule.jobsUrl(), jenkinsHUDModule.jobsSuccessCallback, jenkinsHUDModule.jobsErrorCallback);
+
+        $('#header-title').html(jenkinsHUDModule.url());
+        $("#jenkins-lastupdated").html(dateModule.get());
+        $("#jenkins-welcome").hide();
     }
 
     var JobsModule = (function () {
@@ -63,9 +67,7 @@ var jenkinsHUDModule = (function () {
         function successCallback(data) {
             lastData = currentData;
             currentData = data;
-
-            $('#header-title').html(jenkinsHUDModule.url());
-            $("#jenkins-lastupdated").html(dateModule.get());
+            
             $("#jenkins-invalid-url").hide();
             $("#jenkins-container").show();
             $("#jenkins-jobs").empty();
@@ -101,12 +103,8 @@ var jenkinsHUDModule = (function () {
         }
 
         function errorCallback() {
-            $('#header-title').html('JenkinsHUD');
-            $("#jenkins-lastupdated").html(dateModule.get());
-            $("#jenkins-welcome").hide();
             $("#jenkins-invalid-url").show();
             $("#jenkins-container").hide();
-            $("#jenkins-jobs").hide();
             $("#jenkins-jobs").empty();
         }
 
@@ -126,8 +124,6 @@ var jenkinsHUDModule = (function () {
             lastData = currentData;
             currentData = data;
 
-            $('#header-title').html(jenkinsHUDModule.url());
-            $("#jenkins-lastupdated").html(dateModule.get());
             $("#jenkins-invalid-url").hide();
             $("#jenkins-container").show();
             $('#jenkins-queue').empty();
@@ -144,11 +140,9 @@ var jenkinsHUDModule = (function () {
         }
 
         function errorCallback() {
-            $('#header-title').html('JenkinsHUD');
-            $("#jenkins-lastupdated").html(dateModule.get());
-            $("#jenkins-welcome").hide();
             $("#jenkins-invalid-url").show();
             $("#jenkins-container").hide();
+            $('#jenkins-queue').empty();
         }
 
         return {
@@ -167,8 +161,6 @@ var jenkinsHUDModule = (function () {
             lastData = currentData;
             currentData = data;
 
-            $('#header-title').html(jenkinsHUDModule.url());
-            $("#jenkins-lastupdated").html(dateModule.get());
             $("#jenkins-invalid-url").hide();
             $("#jenkins-container").show();
             $('#jenkins-computers').empty();
@@ -218,11 +210,9 @@ var jenkinsHUDModule = (function () {
         }
 
         function errorCallback() {
-            $('#header-title').html('JenkinsHUD');
-            $("#jenkins-lastupdated").html(dateModule.get());
-            $("#jenkins-welcome").hide();
             $("#jenkins-invalid-url").show();
             $("#jenkins-container").hide();
+            $('#jenkins-computers').empty();
         }
 
         return {
