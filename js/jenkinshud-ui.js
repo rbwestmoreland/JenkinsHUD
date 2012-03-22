@@ -54,7 +54,7 @@ $(document).ready(function () {
         jenkinsHUDReloadInterval = setInterval(function () {
             jenkinsHUDModule.load();
         }, refreshInterval);
-        Update countdown, every second
+        //Update countdown, every second
         $('#jenkins-refresh-countdown').html((refreshInterval / 1000));
         jenkinsHUDReloadCountdownInterval = setInterval(function () {
             var val = $('#jenkins-refresh-countdown').html();
