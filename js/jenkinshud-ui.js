@@ -6,21 +6,22 @@ var jenkinsHUDReloadCountdownInterval;
 
 $(document).ready(function () {
 
-    $("#js-required").remove();
+    $('#js-required').remove();
 
-    $("#modal-setup").on('show', function () {
+    $('#modal-setup').on('show', function () {
         $("#modal-setup-url").val(jenkinsHUDModule.url());
+        $("#modal-setup-url").focus();
     });
 
-    $("#modal-setup-save").click(function () {
+    $('#modal-setup-save').click(function () {
         //Init JenkinsHUD
         jenkinsHudInit();
     });
 
-    $("#modal-setup").submit(function () {
+    $('#modal-setup').submit(function () {
         //Init JenkinsHUD
         jenkinsHudInit();
-        $("#modal-setup").modal('hide');
+        $('#modal-setup').modal('hide');
         return false;
     });
 
@@ -29,11 +30,11 @@ $(document).ready(function () {
         jenkinsHUDLoad();
     }
     else {
-        $("#jenkins-welcome").show();
+        $('#jenkins-welcome').show();
     }
 
     function jenkinsHudInit() {
-        var url = $("#modal-setup-url").val();
+        var url = $('#modal-setup-url').val();
         if (url != null && url != "") {
             //Initialize JenkinsHUD
             jenkinsHUDModule.init(url);
