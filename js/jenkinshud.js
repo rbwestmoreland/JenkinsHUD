@@ -21,7 +21,13 @@ var jenkinsHUDModule = (function () {
             }
         }
 
+        function clear() {
+            clearUrl();
+            clearView();
+        }
+
         function setUrl(url) {
+            clear();
             if (supports_html5_storage() == true) {
                 localStorage['jenkinsUrl'] = url;
             }
@@ -37,6 +43,14 @@ var jenkinsHUDModule = (function () {
             else {
                 return cachedUrl;
             }
+        }
+
+        function clearUrl() {
+            if (supports_html5_storage() == true) {
+                localStorage.removeItem('jenkinsUrl');
+            }
+
+            cachedUrl = null;
         }
 
         function hasUrl() {
@@ -64,6 +78,14 @@ var jenkinsHUDModule = (function () {
             else {
                 return cachedViewName;
             }
+        }
+
+        function clearView() {
+            if (supports_html5_storage() == true) {
+                localStorage.removeItem('jenkinsViewName');
+            }
+
+            cachedViewName = null;
         }
 
         function hasView() {
@@ -105,6 +127,7 @@ var jenkinsHUDModule = (function () {
         $("#jenkins-welcome").hide();
     }
 
+    //#region jobsModule
     var JobsModule = (function () {
 
         var currentData;
@@ -114,38 +137,77 @@ var jenkinsHUDModule = (function () {
             lastData = currentData;
             currentData = data;
 
+            //Standard UI calls
             $("#jenkins-invalid-url").hide();
             $("#jenkins-container").show();
             $("#jenkins-jobs").empty();
 
-            $.each(data.jobs, function () {
-                var color = this.color;
-                var name = this.name;
-                var url = this.url;
-                var labelType;
+            //Create tab container
+            var jobsPrefix = 'jenkins-view-';
+            var regex = new RegExp('\\W+', 'g');
+            $('#jenkins-jobs').append('<ul id="jenkins-views" class="nav nav-tabs"></ul>');
+            $.each(data.views, function () {
 
-                switch (color) {
+                //Populate tab container with tabs
+                var id = jobsPrefix + this.name.replace(regex, '');
+                $('#jenkins-views').append('<li><a href="#' + id + '" data-toggle="tab">' + this.name + '</a></li>');
 
-                    case "red":
-                    case "red_anime":
-                        labelType = 'label-important';
-                        break;
-                    case "yellow":
-                    case "yellow_anime":
-                        labelType = 'label-warning';
-                        break;
-                    case "blue":
-                    case "blue_anime":
-                        labelType = 'label-success';
-                        break;
-                    case "disabled":
-                    default:
-                        labelType = '';
-                        break;
-                }
+                //Generate tab content
+                $('#jenkins-jobs').addClass('tab-content');
+                $('#jenkins-jobs').append('<div id="' + id + '" class="tab-pane"></div>');
 
-                $('#jenkins-jobs').append('<span class="job label ' + labelType + '">' + name + '</span>');
+                $.each(this.jobs, function () {
+                    var color = this.color;
+                    var name = this.name;
+                    var url = this.url;
+                    var labelType;
+
+                    switch (color) {
+
+                        case "red":
+                        case "red_anime":
+                            labelType = 'label-important';
+                            break;
+                        case "yellow":
+                        case "yellow_anime":
+                            labelType = 'label-warning';
+                            break;
+                        case "blue":
+                        case "blue_anime":
+                            labelType = 'label-success';
+                            break;
+                        case "disabled":
+                        default:
+                            labelType = '';
+                            break;
+                    }
+
+                    $('#' + id).append('<span class="job label ' + labelType + '">' + name + '</span>');
+                });
             });
+
+            //Hook up tab click event
+            $('#jenkins-views a[data-toggle="tab"]').click(function () {
+                //Save view as current view.
+                var id = this.attributes['href'].nodeValue;
+                var viewName = id.replace('#' + jobsPrefix, '');
+                settingsModule.setView(viewName);
+            });
+
+            //Set from settings as current
+            if (settingsModule.hasView()) {
+                var activeView = $('a[href="#' + jobsPrefix + settingsModule.getView() + '"]');
+
+                if (activeView.length > 0) {
+                    activeView.click();
+                }
+                else {
+                    $('a[href="#' + jobsPrefix + 'All"]').click();
+                }
+            }
+            else {
+                $('a[href="#' + jobsPrefix + 'All"]').click();
+            }
         }
 
         function errorCallback() {
@@ -160,7 +222,9 @@ var jenkinsHUDModule = (function () {
         }
 
     } ());
+    //#endregion jobsModule
 
+    //#region queueModule
     var QueueModule = (function () {
 
         var currentData;
@@ -197,7 +261,9 @@ var jenkinsHUDModule = (function () {
         }
 
     } ());
+    //#endregion queueModule
 
+    //#region computersModule
     var ComputersModule = (function () {
 
         var currentData;
@@ -280,6 +346,7 @@ var jenkinsHUDModule = (function () {
         }
 
     } ());
+    //#endregion copmutersModule
 
     return {
         init: init,
