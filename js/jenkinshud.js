@@ -7,52 +7,98 @@
 //#region jenkinsModule
 var jenkinsHUDModule = (function () {
 
-    //#region urlModule
-    var urlModule = (function () {
+    //#region settingsModule
+    var settingsModule = (function () {
 
-        function hasUrl() {
-            return !(cookieModule.get() == null || cookieModule.get() == "");
+        var cachedUrl;
+        var cachedViewName;
+
+        function supports_html5_storage() {
+            try {
+                return 'localStorage' in window && window['localStorage'] !== null;
+            } catch (e) {
+                return false;
+            }
         }
 
         function setUrl(url) {
-            cookieModule.set(url);
+            if (supports_html5_storage() == true) {
+                localStorage['jenkinsUrl'] = url;
+            }
+            else {
+                cachedUrl = url;
+            }
         }
 
         function getUrl() {
-            return cookieModule.get();
+            if (supports_html5_storage() == true) {
+                return localStorage['jenkinsUrl'];
+            }
+            else {
+                return cachedUrl;
+            }
         }
 
-        function getQueueUrl() {
-            return getUrl() + '/queue/api/json';
+        function hasUrl() {
+            if (getUrl() == null || getUrl == '') {
+                return false;
+            }
+            else {
+                return true;
+            }
         }
 
-        function getComputersUrl() {
-            return getUrl() + '/computer/api/json?depth=2';
+        function setView(viewName) {
+            if (supports_html5_storage() == true) {
+                localStorage['jenkinsViewName'] = viewName;
+            }
+            else {
+                cachedViewName = viewName;
+            }
         }
 
-        function getJobsUrl() {
-            return getUrl() + '/api/json';
+        function getView() {
+            if (supports_html5_storage() == true) {
+                return localStorage['jenkinsViewName'];
+            }
+            else {
+                return cachedViewName;
+            }
+        }
+
+        function hasView() {
+            if (getView() == null || getView == '') {
+                return false;
+            }
+            else {
+                return true;
+            }
         }
 
         return {
-            get: getUrl,
-            set: setUrl,
-            hasValue: hasUrl,
-            queueUrl: getQueueUrl,
-            computersUrl: getComputersUrl,
-            jobsUrl: getJobsUrl
-        };
+            getUrl: getUrl,
+            setUrl: setUrl,
+            hasUrl: hasUrl,
+            getView: getView,
+            setView: setView,
+            hasView: hasView
+        }
+
     } ());
-    //#endregion urlModule
+    //#endregion settingsModule
 
     function init(jenkinsurl) {
-        urlModule.set(jenkinsurl);
+        settingsModule.setUrl(jenkinsurl);
     }
 
     function load() {
-        jsonpModule.load(urlModule.queueUrl(), jenkinsHUDModule.queueSuccessCallback, jenkinsHUDModule.queueErrorCallback);
-        jsonpModule.load(urlModule.computersUrl(), jenkinsHUDModule.computersSuccessCallback, jenkinsHUDModule.computersErrorCallback);
-        jsonpModule.load(urlModule.jobsUrl(), jenkinsHUDModule.jobsSuccessCallback, jenkinsHUDModule.jobsErrorCallback);
+        var queueUrl = settingsModule.getUrl() + '/queue/api/json';
+        var computersUrl = settingsModule.getUrl() + '/computer/api/json?depth=2';
+        var jobsUrl = settingsModule.getUrl() + '/api/json?depth=1';
+
+        jsonpModule.load(queueUrl, jenkinsHUDModule.queueSuccessCallback, jenkinsHUDModule.queueErrorCallback);
+        jsonpModule.load(computersUrl, jenkinsHUDModule.computersSuccessCallback, jenkinsHUDModule.computersErrorCallback);
+        jsonpModule.load(jobsUrl, jenkinsHUDModule.jobsSuccessCallback, jenkinsHUDModule.jobsErrorCallback);
 
         $('#header-title').html(jenkinsHUDModule.url());
         $("#jenkins-lastupdated").html(dateModule.get());
@@ -67,7 +113,7 @@ var jenkinsHUDModule = (function () {
         function successCallback(data) {
             lastData = currentData;
             currentData = data;
-            
+
             $("#jenkins-invalid-url").hide();
             $("#jenkins-container").show();
             $("#jenkins-jobs").empty();
@@ -98,7 +144,7 @@ var jenkinsHUDModule = (function () {
                         break;
                 }
 
-                $("#jenkins-jobs").append('<span class="job label ' + labelType + '">' + name + '</span>');
+                $('#jenkins-jobs').append('<span class="job label ' + labelType + '">' + name + '</span>');
             });
         }
 
@@ -166,7 +212,22 @@ var jenkinsHUDModule = (function () {
             $('#jenkins-computers').empty();
 
             $.each(data.computer, function () {
-                $('#jenkins-computers').append('<h4>' + this.displayName + '</h4>');
+                var executorsCountTotal = this.executors.length;
+                var executorsCountIdle = 0;
+                var executorsCountBusy = 0;
+
+                $.each(this.executors, function () {
+
+                    if (!this.idle) {
+                        executorsCountBusy++;
+                    }
+                    else {
+                        executorsCountIdle++;
+                    }
+                });
+
+                $('#jenkins-computers').append('<h4>' + this.displayName + ' <small>' + executorsCountTotal + ' executors</small></h4>');
+
                 $.each(this.oneOffExecutors, function () {
                     if (!this.idle) {
                         var progress = this.progress;
@@ -187,7 +248,6 @@ var jenkinsHUDModule = (function () {
                 $.each(this.executors, function () {
                     var number = this.number + 1;
 
-                    $('#jenkins-computers').append('<br/>');
                     if (!this.idle) {
                         var progress = this.progress;
                         var buildnumber = this.currentExecutable.number.toString();
@@ -198,13 +258,12 @@ var jenkinsHUDModule = (function () {
                             name = name.substring(0, 22) + '...';
                         }
 
+                        $('#jenkins-computers').append('<br/>');
                         $('#jenkins-computers').append('<span class="job label label-inverse">' + name + '</span>');
                         $('#jenkins-computers').append('<div class="progress progress-striped active"><div class="bar"style="width: ' + progress + '%;"></div></div>');
                     }
-                    else {
-                        $('#jenkins-computers').append('<span>idle</span>');
-                    }
                 });
+
                 $('#jenkins-computers').append('<hr/>');
             });
         }
@@ -224,8 +283,8 @@ var jenkinsHUDModule = (function () {
 
     return {
         init: init,
-        isInit: urlModule.hasValue,
-        url: urlModule.get,
+        isInit: settingsModule.hasUrl,
+        url: settingsModule.getUrl,
         load: load,
         jobsSuccessCallback: JobsModule.successCallback,
         jobsErrorCallback: JobsModule.errorCallback,
