@@ -9,14 +9,10 @@ $(document).ready(function () {
 
     $('#js-required').remove();
 
+    //#region Setup Modal
     $('#modal-setup').on('show', function () {
         $("#modal-setup-url").val(jenkinsHUDModule.url());
         $("#modal-setup-url").focus();
-    });
-
-    $('#modal-setup-save').click(function () {
-        //Init JenkinsHUD
-        jenkinsHudInit();
     });
 
     $('#modal-setup').submit(function () {
@@ -25,6 +21,31 @@ $(document).ready(function () {
         $('#modal-setup').modal('hide');
         return false;
     });
+
+    $('#modal-setup-save').click(function () {
+        //Init JenkinsHUD
+        jenkinsHudInit();
+    });
+    //#endregion Setup Modal
+
+    //#region Sounds
+    function jenkinsUpdateSoundIcon() {
+        $('#jenkins-toggle-sounds-icon').removeClass('icon-volume-off');
+        $('#jenkins-toggle-sounds-icon').removeClass('icon-volume-up');
+
+        if (jenkinsHUDModule.soundsEnabled()) {
+            $('#jenkins-toggle-sounds-icon').addClass('icon-volume-up');
+        }
+        else {
+            $('#jenkins-toggle-sounds-icon').addClass('icon-volume-off');
+        }
+    }
+
+    $('#jenkins-toggle-sounds').click(function () {
+        jenkinsHUDModule.toggleSounds();
+        jenkinsUpdateSoundIcon();
+    });
+    //#endregion Sounds
 
     if (jenkinsHUDModule.isInit()) {
         //Load JenkinsHUD
@@ -47,6 +68,7 @@ $(document).ready(function () {
     function jenkinsHUDLoad() {
         //Reset
         clearInterval(jenkinsHUDReloadInterval);
+        jenkinsUpdateSoundIcon();
         //Load JenkinsHUD
         jenkinsHUDModule.load();
         //Reload JenkinsHUD again, every N seconds
