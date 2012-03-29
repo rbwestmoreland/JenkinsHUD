@@ -20,7 +20,7 @@ JenkinsHUD provides a team oriented UI of the Jenkins dashboard. Best on big scr
 * [Jenkins CI](http://jenkins-ci.org/)
 * [Twitter Bootstrap](http://twitter.github.com/bootstrap/)
 * [jQuery](http://jquery.com/)
-* [freesound.org](http://freesound.org) All sounds licensed under (CC 3.0)[http://creativecommons.org/licenses/by/3.0/]
+* [freesound.org](http://freesound.org) All sounds licensed under [CC 3.0](http://creativecommons.org/licenses/by/3.0/)
 
 ##License
 Copyright 2012 Bates Westmoreland

@@ -437,9 +437,9 @@ var jenkinsHUDModule = (function () {
 
                             var sourceElement = document.createElement('source');
 
-                            if (audioElement.canPlayType('audio/wave')) {
-                                sourceElement.setAttribute('src', url + '.wav');
-                                sourceElement.setAttribute('type', 'audio/wave');
+                            if (audioElement.canPlayType('audio/ogg')) {
+                                sourceElement.setAttribute('src', url + '.ogg');
+                                sourceElement.setAttribute('type', 'audio/ogg');
                             }
                             else if (audioElement.canPlayType('audio/mpeg')) {
                                 sourceElement.setAttribute('src', url + '.mp3');
