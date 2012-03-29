@@ -424,13 +424,29 @@ var jenkinsHUDModule = (function () {
         var soundQueue = new Array();
 
         function initInterval() {
-            $('body').append('<audio id="jenkin-sounds-player" src="" autoplay="true"></audio>');
             return setInterval(function () {
                 try {
-                    if ($('#jenkin-sounds-player')[0].paused || $('#jenkin-sounds-player')[0].ended) {
+                    var audioElement = document.createElement('audio');
+                    audioElement.setAttribute('autobuffer', 'true');
+                    audioElement.setAttribute('preload', 'auto');
+                    audioElement.setAttribute('autoplay', 'true');
+
+                    if (audioElement.paused || audioElement.ended) {
                         if (soundQueue.length > 0) {
                             var url = soundQueue.pop();
-                            $('#jenkin-sounds-player').attr('src', url);
+
+                            var sourceElement = document.createElement('source');
+
+                            if (audioElement.canPlayType('audio/wave')) {
+                                sourceElement.setAttribute('src', url + '.wav');
+                                sourceElement.setAttribute('type', 'audio/wave');
+                            }
+                            else if (audioElement.canPlayType('audio/mpeg')) {
+                                sourceElement.setAttribute('src', url + '.mp3');
+                                sourceElement.setAttribute('type', 'audio/mpeg');
+                            }
+
+                            audioElement.appendChild(sourceElement);
                         }
                     }
                 } catch (e) { }
@@ -439,25 +455,25 @@ var jenkinsHUDModule = (function () {
 
         function playJobStarted() {
             if (settingsModule.soundsEnabled()) {
-                soundQueue.push('audio/theme1/job-started.wav');
+                soundQueue.push('audio/theme1/job-started');
             }
         }
 
         function playJobSuccessful() {
             if (settingsModule.soundsEnabled()) {
-                soundQueue.push('audio/theme1/job-successful.wav');
+                soundQueue.push('audio/theme1/job-successful');
             }
         }
 
         function playJobUnstable() {
             if (settingsModule.soundsEnabled()) {
-                soundQueue.push('audio/theme1/job-unstable.wav');
+                soundQueue.push('audio/theme1/job-unstable');
             }
         }
 
         function playJobFailed() {
             if (settingsModule.soundsEnabled()) {
-                soundQueue.push('audio/theme1/job-failed.wav');
+                soundQueue.push('audio/theme1/job-failed');
             }
         }
 
