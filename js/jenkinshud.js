@@ -12,6 +12,7 @@ var jenkinsHUDModule = (function () {
 
         var cachedUrl;
         var cachedViewName;
+        var cachedSoundsEnabled;
 
         function supports_html5_storage() {
             try {
@@ -54,7 +55,7 @@ var jenkinsHUDModule = (function () {
         }
 
         function hasUrl() {
-            if (getUrl() == null || getUrl == '') {
+            if (getUrl() == null || getUrl() == '') {
                 return false;
             }
             else {
@@ -89,11 +90,47 @@ var jenkinsHUDModule = (function () {
         }
 
         function hasView() {
-            if (getView() == null || getView == '') {
+            if (getView() == null || getView() == '') {
                 return false;
             }
             else {
                 return true;
+            }
+        }
+
+        function soundsEnabled() {
+            if (supports_html5_storage() == true) {
+                var jenkinsSoundsEnabled = localStorage['jenkinsSoundsEnabled'];
+                if (jenkinsSoundsEnabled == 'true') {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                return cachedSoundsEnabled;
+            }
+        }
+
+        function clearSoundsEnabled() {
+            if (supports_html5_storage() == true) {
+                localStorage.removeItem('jenkinsSoundsEnabled');
+            }
+
+            cachedSoundsEnabled = false;
+        }
+
+        function toggleSounds() {
+            if (supports_html5_storage() == true) {
+                localStorage['jenkinsSoundsEnabled'] = !soundsEnabled();
+            }
+            else {
+                cachedSoundsEnabled = !cachedSoundsEnabled;
+            }
+
+            if (soundsEnabled()) {
+                soundModule.playJobStarted();
             }
         }
 
@@ -103,7 +140,9 @@ var jenkinsHUDModule = (function () {
             hasUrl: hasUrl,
             getView: getView,
             setView: setView,
-            hasView: hasView
+            hasView: hasView,
+            toggleSounds: toggleSounds,
+            soundsEnabled: soundsEnabled
         }
 
     } ());
@@ -146,24 +185,43 @@ var jenkinsHUDModule = (function () {
             var jobsPrefix = 'jenkins-view-';
             var regex = new RegExp('\\W+', 'g');
             $('#jenkins-jobs').append('<ul id="jenkins-views" class="nav nav-tabs"></ul>');
-            $.each(data.views, function () {
+            $.each(data.views, function (viewIndex) {
 
                 //Populate tab container with tabs
-                var id = jobsPrefix + this.name.replace(regex, '');
+                var viewName = this.name.replace(regex, '');
+                var id = jobsPrefix + viewName;
                 $('#jenkins-views').append('<li><a href="#' + id + '" data-toggle="tab">' + this.name + '</a></li>');
 
                 //Generate tab content
                 $('#jenkins-jobs').addClass('tab-content');
                 $('#jenkins-jobs').append('<div id="' + id + '" class="tab-pane"></div>');
 
-                $.each(this.jobs, function () {
+                $.each(this.jobs, function (jobIndex) {
+                    var lastColor = this.color;
                     var color = this.color;
                     var name = this.name;
                     var url = this.url;
                     var labelType;
 
-                    switch (color) {
+                    try {
+                        lastColor = lastData.views[viewIndex].jobs[jobIndex].color;
+                    } catch (e) { }
 
+                    if (viewName == settingsModule.getView()) {
+                        if (lastColor != color) {
+                            if (color == 'blue') {
+                                soundModule.playJobSuccessful();
+                            }
+                            if (color == 'yellow') {
+                                soundModule.playJobUnstable();
+                            }
+                            if (color == 'red') {
+                                soundModule.playJobFailed();
+                            }
+                        }
+                    }
+
+                    switch (color) {
                         case "red":
                         case "red_anime":
                             labelType = 'label-important';
@@ -202,11 +260,11 @@ var jenkinsHUDModule = (function () {
                     activeView.click();
                 }
                 else {
-                    $('a[href="#' + jobsPrefix + 'All"]').click();
+                    $('#jenkins-views a[data-toggle="tab"]').first().click();
                 }
             }
             else {
-                $('a[href="#' + jobsPrefix + 'All"]').click();
+                $('#jenkins-views a[data-toggle="tab"]').first().click();
             }
         }
 
@@ -277,7 +335,7 @@ var jenkinsHUDModule = (function () {
             $("#jenkins-container").show();
             $('#jenkins-computers').empty();
 
-            $.each(data.computer, function () {
+            $.each(data.computer, function (computerIndex) {
                 var executorsCountTotal = this.executors.length;
                 var executorsCountIdle = 0;
                 var executorsCountBusy = 0;
@@ -311,12 +369,15 @@ var jenkinsHUDModule = (function () {
                     }
                 });
 
-                $.each(this.executors, function () {
+                $.each(this.executors, function (executorIndex) {
                     var number = this.number + 1;
+                    var thisName = '';
+                    var lastName = '';
 
                     if (!this.idle) {
                         var progress = this.progress;
                         var buildnumber = this.currentExecutable.number.toString();
+                        thisName = this.currentExecutable.fullDisplayName;
                         var name = this.currentExecutable.fullDisplayName;
                         name = name.substring(0, name.length - buildnumber.length - 2);
 
@@ -327,6 +388,14 @@ var jenkinsHUDModule = (function () {
                         $('#jenkins-computers').append('<br/>');
                         $('#jenkins-computers').append('<span class="job label label-inverse">' + name + '</span>');
                         $('#jenkins-computers').append('<div class="progress progress-striped active"><div class="bar"style="width: ' + progress + '%;"></div></div>');
+                    }
+
+                    try {
+                        lastName = lastData.computer[computerIndex].executors[executorIndex].currentExecutable.fullDisplayName;
+                    } catch (e) { }
+
+                    if (lastData != null && lastName == '' && thisName != '') {
+                        soundModule.playJobStarted();
                     }
                 });
 
@@ -348,6 +417,59 @@ var jenkinsHUDModule = (function () {
     } ());
     //#endregion copmutersModule
 
+    //#region soundModule
+    var soundModule = (function () {
+
+        var interval = initInterval();
+        var soundQueue = new Array();
+
+        function initInterval() {
+            $('body').append('<audio id="jenkin-sounds-player" src="" autoplay="true"></audio>');
+            return setInterval(function () {
+                try {
+                    if ($('#jenkin-sounds-player')[0].paused || $('#jenkin-sounds-player')[0].ended) {
+                        if (soundQueue.length > 0) {
+                            var url = soundQueue.pop();
+                            $('#jenkin-sounds-player').attr('src', url);
+                        }
+                    }
+                } catch (e) { }
+            }, 500);
+        }
+
+        function playJobStarted() {
+            if (settingsModule.soundsEnabled()) {
+                soundQueue.push('audio/theme1/job-started.wav');
+            }
+        }
+
+        function playJobSuccessful() {
+            if (settingsModule.soundsEnabled()) {
+                soundQueue.push('audio/theme1/job-successful.wav');
+            }
+        }
+
+        function playJobUnstable() {
+            if (settingsModule.soundsEnabled()) {
+                soundQueue.push('audio/theme1/job-unstable.wav');
+            }
+        }
+
+        function playJobFailed() {
+            if (settingsModule.soundsEnabled()) {
+                soundQueue.push('audio/theme1/job-failed.wav');
+            }
+        }
+
+        return {
+            playJobStarted: playJobStarted,
+            playJobSuccessful: playJobSuccessful,
+            playJobUnstable: playJobUnstable,
+            playJobFailed: playJobFailed
+        }
+    } ());
+    //#endregion soundModule
+
     return {
         init: init,
         isInit: settingsModule.hasUrl,
@@ -358,7 +480,9 @@ var jenkinsHUDModule = (function () {
         computersSuccessCallback: ComputersModule.successCallback,
         computersErrorCallback: ComputersModule.errorCallback,
         queueSuccessCallback: QueueModule.successCallback,
-        queueErrorCallback: QueueModule.errorCallback
+        queueErrorCallback: QueueModule.errorCallback,
+        toggleSounds: settingsModule.toggleSounds,
+        soundsEnabled: settingsModule.soundsEnabled
     }
 
 } ());
