@@ -6,11 +6,11 @@ JenkinsHUD provides a team oriented UI of the Jenkins dashboard. Best on big scr
 
 ###Locally
 
-* Download: [https://github.com/betobates/JenkinsHUD/zipball/master](https://github.com/betobates/JenkinsHUD/zipball/master)
+* Download: [https://github.com/rbwestmoreland/JenkinsHUD/zipball/master](https://github.com/rbwestmoreland/JenkinsHUD/zipball/master)
 * Open `index.html`
 
 ###Online
-* [http://betobates.github.com/JenkinsHUD](http://betobates.github.com/JenkinsHUD)
+* [http://rbwestmoreland.github.com/JenkinsHUD](http://rbwestmoreland.github.com/JenkinsHUD)
 
 ##Screenshot
 ![JenkinsHUD Screenshot](http://farm8.staticflickr.com/7203/6840275606_5be2acb051_b_d.jpg)
