@@ -1,35 +1,27 @@
 ﻿/// <reference path="jquery-1.7.1-vsdoc.js" />
-
+/*jslint browser: true */
+/*global $ */
 var jsonpModule = (function () {
-
+    'use strict';
     function load(url, successCallback, errorCallback) {
-
         $.ajax({
             accepts: 'application/json',
             url: url,
             dataType: 'jsonp',
             jsonp: 'jsonp',
             timeout: 4000
-        }).success(function (data, textStatus, jqXHR) {
+        }).success(function (data) {
             successCallback(data);
-        }).error(function (jqXHR, textStatus, errorThrown) {
+        }).error(function () {
             errorCallback();
-        }).complete(function (jqXHR, textStatus) {
-            var request = jqXHR;
         });
-
         var $script = $(document.getElementsByTagName('head')[0].firstChild);
-        var url = $script.attr('src') || '';
-        var cb = (url.match(/jsonp=(\w+)/) || [])[1];
-
-        $script[0].onerror = function (e) {
+        url = $script.attr('src') || '';
+        $script[0].onerror = function () {
             errorCallback();
         };
-
-        var wait = 'wait';
     }
-
     return {
         load: load
     };
-} ());
+}());
