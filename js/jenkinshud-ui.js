@@ -28,6 +28,7 @@ $(document).ready(function () {
         jenkinsHUDReloadInterval = setInterval(function () {
             if (secondsRemainingBeforeReload < 1) {
                 jenkinsHUDModule.load();
+                if ('_gauges' in window) { _gauges.push(['track']); }
                 secondsRemainingBeforeReload = secondsBetweenReloads;
             } else {
                 secondsRemainingBeforeReload = secondsRemainingBeforeReload - 1;
