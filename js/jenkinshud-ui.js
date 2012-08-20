@@ -5,6 +5,9 @@
 var secondsBetweenReloads = 5;
 var secondsRemainingBeforeReload = secondsBetweenReloads;
 var jenkinsHUDReloadInterval;
+var secondsBetweenTracks = 3600; //1 hour
+var secondsRemainingBeforeTrack = secondsBetweenReloads;
+var trackInterval;
 
 $(document).ready(function () {
     'use strict';
@@ -28,12 +31,20 @@ $(document).ready(function () {
         jenkinsHUDReloadInterval = setInterval(function () {
             if (secondsRemainingBeforeReload < 1) {
                 jenkinsHUDModule.load();
-                if ('_gauges' in window) { _gauges.push(['track']); }
                 secondsRemainingBeforeReload = secondsBetweenReloads;
             } else {
                 secondsRemainingBeforeReload = secondsRemainingBeforeReload - 1;
             }
             $('#jenkins-refresh-countdown').html(secondsRemainingBeforeReload);
+        }, 1000);
+        //Track user, every N seconds
+        trackInterval = setInterval(function () {
+            if (secondsRemainingBeforeTrack < 1) {
+                if ('_gauges' in window) { _gauges.push(['track']); }
+                secondsRemainingBeforeTrack = secondsBetweenTracks;
+            } else {
+                secondsRemainingBeforeTrack = secondsRemainingBeforeTrack - 1;
+            }
         }, 1000);
     }
     function jenkinsHudInit() {
