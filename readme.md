@@ -36,3 +36,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+##Issues
+If you are not able to connect to your Jenkins instance you may need to allow JSONP requests. This can be easily achieved with a Jenkins Plugin like [Secure Requester Whitelist](https://wiki.jenkins-ci.org/display/JENKINS/Secure+Requester+Whitelist+Plugin).
