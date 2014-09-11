@@ -177,7 +177,7 @@ var jenkinsHUDModule = (function () {
                     $('#jenkins-jobs').addClass('tab-content');
                     $('#jenkins-jobs').append('<div id="' + id + '" class="tab-pane"></div>');
                     $.each(this.jobs, function (jobIndex) {
-                        var lastColor = this.color, color = this.color, name = this.name, url = this.url, labelType;
+                        var lastColor = this.color, color = this.color, name = this.name, url = this.url + "lastBuild", labelType;
                         try {
                             lastColor = lastData.views[viewIndex].jobs[jobIndex].color;
                         } catch (e) { }
