@@ -177,7 +177,7 @@ var jenkinsHUDModule = (function () {
                     $('#jenkins-jobs').addClass('tab-content');
                     $('#jenkins-jobs').append('<div id="' + id + '" class="tab-pane"></div>');
                     $.each(this.jobs, function (jobIndex) {
-                        var lastColor = this.color, color = this.color, name = this.name, labelType;
+                        var lastColor = this.color, color = this.color, name = this.name, url = this.url + "lastBuild", labelType;
                         try {
                             lastColor = lastData.views[viewIndex].jobs[jobIndex].color;
                         } catch (e) { }
@@ -211,7 +211,7 @@ var jenkinsHUDModule = (function () {
                             labelType = '';
                             break;
                         }
-                        $('#' + id).append('<span class="job label ' + labelType + '">' + name + '</span>');
+                        $('#' + id).append('<a href="' + url + '"><span class="job label ' + labelType + '">' + name + '</span></a>');
                     });
                 });
                 //Hook up tab click event
